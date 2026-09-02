@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ga-aba-lookup"
+version = "0.1.0"
+description = "Georgia SOS Behavior Analyst license verification"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "playwright>=1.49.0",
+  "pyyaml>=6.0",
+  "openpyxl>=3.1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+ga-aba-lookup = "main:cli"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

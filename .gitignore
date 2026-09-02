@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.egg-info/
+.browser-profile/
+.browser-profile-chrome/
+output/
+spike/phase0_result.json
+.idea/
+.vscode/
+.cursor/
+*.canvas.tsx
+.DS_Store
+Thumbs.db
+

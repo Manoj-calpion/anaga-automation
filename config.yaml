@@ -1,0 +1,54 @@
+# Georgia ABA license lookup — do not hardcode these in source.
+#
+# Open questions (SPEC §11) — defaults chosen until PDD owners confirm:
+#   1. Input: CSV or XLSX with a license-number column (and optional license_type).
+#   2. Output: one folder (flat). Set output_layout: per_provider_folder if needed.
+#   3. Date in filename: MM-DD-YYYY (matches on-screen). YYYY-MM-DD also supported.
+#   4. Separator: ASCII " - " (hyphen). Set " – " for the PDD en dash.
+#   5. License type: license_type_default, overridable per row via license_type_column.
+#   6. Expired/lapsed/inactive: still capture PDF; flag in run_log (status still OK).
+#   7. Volume: max_per_hour cap. Run off-peak for large batches.
+#   8. Re-verify: on_existing_file=skip (resume-safe). Use overwrite to recapture.
+
+input_file: "data/sample_input.csv"
+input_column: "license_number"
+license_type_column: "license_type"   # optional; blank cells use license_type_default
+provider_folder_column: ""            # optional; used when output_layout is per_provider_folder
+
+output_root: "output"
+output_layout: "flat"                 # flat | per_provider_folder
+quarantine_folder: "output/quarantine"
+
+license_type_default: "Behavior Analyst"
+profession_type: "Behavior Analyst"
+state_code: "GA"
+search_type: "Individual"             # radioGroup value
+
+date_format_in_filename: "MM-DD-YYYY"
+filename_separator: " - "
+on_existing_file: "skip"              # skip | version | overwrite
+
+max_per_hour: 100
+headed: true
+search_click_mode: "auto"             # auto | human  (human = you click Search)
+
+user_data_dir: ".browser-profile"
+browser_channel: "chrome"             # real Chrome; blank = bundled Chromium
+viewport_width: 1400
+viewport_height: 1000
+
+search_url: "https://goals.sos.ga.gov/GASOSOneStop/s/licensee-search"
+
+# per_license: one CAPTCHA-gated search per row (Phase 1).
+# roster: one search for the board, then unattended detail visits (only if Phase 0 passes).
+lookup_mode: "per_license"
+
+ui_delay_ms_min: 300
+ui_delay_ms_max: 800
+provider_delay_s_min: 3
+provider_delay_s_max: 8
+interaction_timeout_ms: 30000
+
+recaptcha_max_consecutive: 3
+provider_retry_once: true
+cloudflare_wait_s: 300  # seconds to wait if the human checkbox is showing
