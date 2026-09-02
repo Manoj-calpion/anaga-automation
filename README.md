@@ -1,54 +1,107 @@
-# Anaga Automation
+<div align="center">
 
-**Georgia Secretary of State — Behavior Analyst license verification, end to end.**
+# 🍑 Anaga Automation
 
-A headed Chrome bot that looks up each provider on the public GOALS licensee search, reads the primary-source record, and files a verification PDF under a stable name. CSV in. PDFs and a run log out. No GUI, no database, no captcha-solving service.
+### Georgia SOS · Behavior Analyst license verification
+
+<img src="https://img.shields.io/badge/Georgia-GOALS-b91c1c?style=for-the-badge&labelColor=111827" alt="Georgia GOALS" />
+<img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=111827" alt="Python" />
+<img src="https://img.shields.io/badge/Playwright-Headed_Chrome-2EAD33?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=111827" alt="Playwright" />
+<img src="https://img.shields.io/badge/Status-v0.1_local-f59e0b?style=for-the-badge&labelColor=111827" alt="Status" />
+
+**CSV in → live primary-source lookup → verification PDF + run log out.**
+
+No GUI. No database. No captcha-solving service.
+
+</div>
 
 ---
 
-## Why this exists
-
-Credentialing still walks the Georgia SOS Behavior Analyst board the long way: open the search, pick profession and license type, type a number, open the record, check status / type / issued / expires, then Ctrl+P into that provider’s folder.
-
-This repo is that path, scripted — against the live GOALS Experience Cloud app (`goals.sos.ga.gov`), not the marketing site.
+> [!TIP]
+> **Green path:** Chrome opens, form fills itself, Search clicks, PDF lands in `output/`.  
+> **Yellow path:** Cloudflare shows a box — click it **once**, wait, do not mash it.  
+> **Red path:** do not add stealth, solvers, or Aura API hacks.
 
 ---
 
-## What it does today
+## 🎯 Why this exists
 
-| Step | Behavior |
-| --- | --- |
-| Input | Reads license numbers from CSV or XLSX (`config.yaml`) |
-| Browser | One headed Chrome window, persistent profile, one tab, sequential |
-| Search | Profession Type → License Type → license number → Search |
-| Match | Exactly one result, license number must match; never guesses |
-| Detail | Scrapes first / middle / last, status, type, issued, expires |
-| PDF | Prints the detail page as-is (primary source, not re-typeset) |
-| Name | `Provider Name - GA - License Type - MM-DD-YYYY.pdf` |
-| Log | One `run_log.csv` row per input license; `failures.csv` for re-runs |
-| Resume | Re-run skips licenses that already have a good PDF; retries errors |
+Credentialing still walks the Georgia board by hand:
 
-**Also in place**
+`open search → Profession Type → License Type → license number → Search → open record → check status / type / issued / expires → Ctrl+P`
 
-- Salesforce shadow DOM and SLDS faux-comboboxes (`<button>`, not `<select>`)
-- Invisible reCAPTCHA v3 on Search: trusted Playwright clicks, no token forge, no solver
-- Cloudflare “verify you are human”: the bot **pauses**. You click the box **once** and wait. Reloading or mashing the box makes it come back
-- Rate limit (~100/hour), delays between actions and providers, recaptcha circuit breaker
-- Expired / lapsed / inactive licenses still get a PDF and a flag — that is a finding, not a crash
-- Unit tests for filenames (middle name, `O'Brien`, `Smith-Dogbey`, blank expiry, long paths) and parsers
+This repo is that walk, scripted against the **live GOALS app**  
+[`goals.sos.ga.gov`](https://goals.sos.ga.gov/GASOSOneStop/s/licensee-search) — not the marketing pages on `sos.ga.gov`.
 
-**Layout**
-
-```
-config.yaml              # paths, pacing, lookup mode
-data/sample_input.csv    # two rows: a known license + a deliberate miss
-src/                     # CLI, browser, search, detail, naming, logs
-tests/                   # naming + parse + run-log tests
-spike/                   # Phase 0 roster / deep-link experiment
-output/                  # gitignored — PDFs, run_log.csv, failures.csv
+```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#fecaca', 'primaryTextColor': '#111827', 'primaryBorderColor': '#b91c1c', 'lineColor': '#f97316', 'secondaryColor': '#bbf7d0', 'tertiaryColor': '#fde68a'}}}%%
+flowchart LR
+  A["📄 CSV / XLSX"] --> B["🌐 Headed Chrome"]
+  B --> C["🔎 GOALS search"]
+  C --> D["🪪 Detail record"]
+  D --> E["📕 PDF"]
+  D --> F["📋 run_log.csv"]
 ```
 
-**Run**
+---
+
+## ✅ What is already built
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🟢 Pipeline
+
+- Reads license numbers from **CSV or XLSX**
+- One headed Chrome window, **persistent profile**, **one tab**
+- Selects **Behavior Analyst** profession + license type
+- Types the license number and clicks **Search**
+- Opens the record only when there is **exactly one match**
+- Scrapes name, status, type, issued, expires
+- Saves a **primary-source PDF** (page as-is)
+- Filename:  
+  `Name - GA - License Type - MM-DD-YYYY.pdf`
+
+</td>
+<td width="50%" valign="top">
+
+### 🟢 Safety nets
+
+- Salesforce **shadow DOM** + SLDS dropdowns
+- Invisible **reCAPTCHA v3** — real clicks, no forge
+- **Cloudflare pause** — you click once; bot waits
+- ~**100 lookups / hour**, human-pace delays
+- Recaptcha **circuit breaker** (3 strikes → stop)
+- Expired / lapsed still get a PDF + flag
+- Resume without duplicating good PDFs
+- Unit tests: `O'Brien`, `Smith-Dogbey`, blank expiry, long paths
+
+</td>
+</tr>
+</table>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/input-CSV%20%7C%20XLSX-8b5cf6?style=flat-square" alt="input" />
+  <img src="https://img.shields.io/badge/output-PDF%20%2B%20CSV-06b6d4?style=flat-square" alt="output" />
+  <img src="https://img.shields.io/badge/state-GA_only-ef4444?style=flat-square" alt="GA" />
+  <img src="https://img.shields.io/badge/profession-Behavior_Analyst-10b981?style=flat-square" alt="ABA" />
+</p>
+
+### 📁 Layout
+
+```text
+anaga-automation/
+├── README.md                 ← you are here
+├── config.yaml               ← paths, pacing, lookup mode
+├── data/sample_input.csv     ← LBA000602 + invalid LBA999999
+├── src/                      ← CLI, browser, search, detail, naming, logs
+├── tests/                    ← filename + parser tests
+├── spike/                    ← Phase 0 roster / token experiment
+└── output/                   ← gitignored PDFs + run_log.csv
+```
+
+### ▶️ Run it
 
 ```powershell
 python -m pip install -r requirements.txt
@@ -58,55 +111,84 @@ python -m pytest tests
 python -m main --config config.yaml
 ```
 
-Leave the Chrome window open. If Cloudflare asks, check the box **once**, then do nothing. The script continues when the search form appears.
+Leave the Chrome window open.
 
-Sample input includes `LBA000602` (Andrea Smith, expected PDF name  
-`Andrea Smith - GA - Behavior Analyst - 08-31-2027.pdf`) and `LBA999999` (should log `NOT_FOUND`, no PDF).
-
----
-
-## What is not done yet
-
-Treat this as a working pipeline with live-site work still open — not a finished production drop.
-
-1. **Live acceptance** — `LBA000602` PDF, invalid number `NOT_FOUND`, and a 25-license batch with zero unhandled exceptions have not been signed off on the live site. Dropdown selection and Cloudflare were still failing during the first runs.
-2. **Phase 0 spike** — One board-wide search that yields detail tokens for everyone would make later steps unattended. That test has not succeeded. Until it does, keep `lookup_mode: per_license` in `config.yaml`. If the spike later proves tokens work, switch to `roster`.
-3. **Cloudflare / recaptcha reliability** — Search is still gated. Headed Chrome and a human checkbox click are the compliant path. Do not add solvers, stealth packs, or token replay.
-4. **PDD open questions** — Input file location, per-provider folder vs flat `output/`, filename date (`MM-DD-YYYY` vs `YYYY-MM-DD`), hyphen vs en dash, assistant/temporary license types in the feed, re-verify vs skip existing PDFs, volume/cadence. Defaults are in `config.yaml`; confirm with operations before a large run.
-5. **PDF in headed Chrome** — Capture uses CDP print / Playwright PDF. Confirm files open and contain the on-screen text on the target Windows boxes.
-6. **Operations wrap** — No scheduler, no GUI, no extra states or professions. A Task Scheduler / CI wrapper is out of scope here.
-7. **Production data** — Point `input_file` and `output_root` at the real provider list and document folders. Do not commit those files.
+| Sample license | Expected |
+| :---: | :--- |
+| 🟢 `LBA000602` | PDF `Andrea Smith - GA - Behavior Analyst - 08-31-2027.pdf` |
+| 🔴 `LBA999999` | `NOT_FOUND` in the log, **no** PDF |
 
 ---
 
-## Hard rules (do not “fix” these)
+## 🟡 What still needs to be done
 
-- Do not bypass, solve, or forge CAPTCHA
-- Do not call the Salesforce Aura API directly (`fwuid` rotates)
-- Do not cache detail URL tokens across runs
-- Do not write a PDF unless the scraped license number matches the request
-- Do not run headless against Search (scores poorly)
-- Do not parallelize tabs or processes against GOALS
+> [!WARNING]
+> **v0.1 is usable locally. The live GOALS site is not fully green yet.**  
+> Do not point this at the full roster until the list below is closed.
+
+| | Item | Why it matters |
+| :---: | :--- | :--- |
+| 🟠 | **Live acceptance** | `LBA000602` PDF + invalid `NOT_FOUND` + 25-license batch with zero crashes. First runs died on Cloudflare and the Profession dropdown. |
+| 🟠 | **Phase 0 spike** | One board-wide search that unlocks every detail page would skip CAPTCHA after the first Search. Not proven. Keep `lookup_mode: per_license` until it is. |
+| 🟠 | **Cloudflare / recaptcha** | Search is still gated. Headed Chrome + one human checkbox is the allowed path. No solvers. No stealth. |
+| 🟠 | **PDD decisions** | Real input file, flat vs per-provider folders, `MM-DD-YYYY` vs `YYYY-MM-DD`, hyphen vs en dash, assistant/temporary types, skip vs recapture PDFs. Defaults live in `config.yaml`. |
+| 🟠 | **PDF check on Windows** | Confirm headed Chrome actually writes a readable print PDF. |
+| ⚪ | **Scheduler / GUI** | Out of scope. Wrap with Task Scheduler later if you want. |
+| ⚪ | **Production data** | Point `input_file` and `output_root` at real folders. Never commit those files. |
 
 ---
 
-## Config you will actually change
+## 🛑 Hard rules — do not “fix” these
+
+> [!CAUTION]
+> Breaking these gets the run blocked or the verification thrown out.
+
+```diff
+- Bypass, solve, or forge CAPTCHA
+- Call the Salesforce Aura API directly (fwuid rotates)
+- Cache detail URL tokens across runs
+- Write a PDF if the scraped license number ≠ the request
+- Run Search in headless Chrome
+- Parallel tabs / parallel processes against GOALS
+```
+
+```diff
++ Headed Chrome, one tab, human pace
++ Pause on Cloudflare — one checkbox click, then wait
++ Match license number before any PDF
++ Log every input row, including failures
+```
+
+---
+
+## ⚙️ Config you will actually change
 
 ```yaml
 input_file: "data/sample_input.csv"
 input_column: "license_number"
 output_root: "output"
-on_existing_file: "skip"          # skip | version | overwrite
-lookup_mode: "per_license"        # roster only after Phase 0 succeeds
-search_click_mode: "auto"         # human = you click Search
+on_existing_file: "skip"       # skip | version | overwrite
+lookup_mode: "per_license"     # roster only after Phase 0 succeeds
+search_click_mode: "auto"      # human = you click Search
 headed: true
 ```
 
-`--human-search-click` is optional and only for when auto Search is rejected. Default is hands-off form fill + Search click.
+`--human-search-click` is optional. Use it only if auto Search keeps getting rejected.
 
 ---
 
-## Status
+<div align="center">
 
-**v0.1 — usable locally, live site not fully green.**  
-Push this, run against the sample file, then close the acceptance list above before you point it at the full roster.
+### 🚦 Status
+
+<img src="https://img.shields.io/badge/local_CLI-ready-22c55e?style=for-the-badge&labelColor=0f172a" alt="local ready" />
+<img src="https://img.shields.io/badge/live_GOALS-in_progress-eab308?style=for-the-badge&labelColor=0f172a" alt="live in progress" />
+<img src="https://img.shields.io/badge/production_roster-not_yet-ef4444?style=for-the-badge&labelColor=0f172a" alt="prod not yet" />
+
+**Next:** green the sample run on live GOALS, then close the 25-license acceptance list.
+
+<br/>
+
+<sub>Anaga Automation · Georgia Behavior Analyst · public primary-source verification</sub>
+
+</div>
