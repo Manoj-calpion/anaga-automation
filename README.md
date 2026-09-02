@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🍑 Anaga Automation
+<img src="https://img.shields.io/badge/ANAGA-License_Verification-0f172a?style=for-the-badge&labelColor=b91c1c" alt="Anaga license verification" />
+
+# Anaga Automation
 
 ### Georgia SOS · Behavior Analyst license verification
 
